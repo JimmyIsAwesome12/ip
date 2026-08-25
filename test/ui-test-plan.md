@@ -90,7 +90,7 @@ count) shows up in the very next positive case rather than being masked.
 - **Expected output:**
   ```
   ____________________________________________________________
-  OOPS!!! I don't understand that command. Try: list, todo, mark, unmark, or bye.
+  OOPS!!! I don't understand that command. Try: list, todo, mark, unmark, delete, or bye.
   ____________________________________________________________
   ____________________________________________________________
   Bye. Hope to see you again soon!
@@ -262,6 +262,98 @@ count) shows up in the very next positive case rather than being masked.
   ____________________________________________________________
   ____________________________________________________________
   OOPS!!! There is no task 5 in your list. You have 1 task(s).
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+
+## Test Case: Delete a task from the middle of the list
+
+- **Aim:** `delete <index>` removes the given task, confirms it with the
+  removed task's text and the new task count, and `list` shows the
+  remaining tasks correctly re-numbered (not just nulled out).
+- **Commands:**
+  ```
+  todo read book
+  todo return book
+  todo buy bread
+  delete 2
+  list
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  added: read book
+  ____________________________________________________________
+  ____________________________________________________________
+  added: return book
+  ____________________________________________________________
+  ____________________________________________________________
+  added: buy bread
+  ____________________________________________________________
+  ____________________________________________________________
+  Noted. I've removed this task:
+    [ ] return book
+  Now you have 2 tasks in the list.
+  ____________________________________________________________
+  ____________________________________________________________
+  Here are the tasks in your list:
+  1.[ ] read book
+  2.[ ] buy bread
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+
+## Test Case: Reject delete with a missing task number
+
+- **Aim:** `delete` with no argument is rejected with an error, rather than
+  crashing.
+- **Commands:**
+  ```
+  todo read book
+  delete
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  added: read book
+  ____________________________________________________________
+  ____________________________________________________________
+  OOPS!!! Tell me which task number to delete, e.g. delete 2
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+
+## Test Case: Reject delete with an out-of-range task number
+
+- **Aim:** `delete <n>` where `n` is outside the current list is rejected
+  with an error, and the task list is left unchanged (verified by `list`
+  still showing the one task afterward).
+- **Commands:**
+  ```
+  todo read book
+  delete 5
+  list
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  added: read book
+  ____________________________________________________________
+  ____________________________________________________________
+  OOPS!!! There is no task 5 in your list. You have 1 task(s).
+  ____________________________________________________________
+  ____________________________________________________________
+  Here are the tasks in your list:
+  1.[ ] read book
   ____________________________________________________________
   ____________________________________________________________
   Bye. Hope to see you again soon!
