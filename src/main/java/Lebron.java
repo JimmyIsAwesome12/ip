@@ -1,3 +1,5 @@
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -65,7 +67,12 @@ public class Lebron {
         System.out.println("What can I do for you?");
         System.out.println(LINE);
 
-        ArrayList<Task> tasks = new ArrayList<>();
+        // Tasks are persisted to ./data/lebron.txt (relative to the project
+        // root). The path is built from segments so it works on any OS, and
+        // Storage handles the file/folder not existing yet.
+        Path dataFile = Paths.get("data", "lebron.txt");
+        Storage storage = new Storage(dataFile);
+        ArrayList<Task> tasks = storage.load();
 
         Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -93,6 +100,7 @@ public class Lebron {
                     System.out.println("OOPS!!! A todo needs a description, e.g. todo read book");
                 } else {
                     tasks.add(new Task(arguments));
+                    storage.save(tasks);
                     System.out.println("added: " + arguments);
                 }
                 break;
@@ -101,10 +109,12 @@ public class Lebron {
                 Integer index = parseTaskIndex(arguments, keyword, tasks.size());
                 if (index != null && command == Command.MARK) {
                     tasks.get(index - 1).markAsDone();
+                    storage.save(tasks);
                     System.out.println("Nice! I've marked this task as done:");
                     System.out.println("  " + tasks.get(index - 1));
                 } else if (index != null) {
                     tasks.get(index - 1).markAsNotDone();
+                    storage.save(tasks);
                     System.out.println("OK, I've marked this task as not done yet:");
                     System.out.println("  " + tasks.get(index - 1));
                 }
@@ -114,6 +124,7 @@ public class Lebron {
                 Integer index = parseTaskIndex(arguments, keyword, tasks.size());
                 if (index != null) {
                     Task removed = tasks.remove(index - 1);
+                    storage.save(tasks);
                     System.out.println("Noted. I've removed this task:");
                     System.out.println("  " + removed);
                     System.out.println("Now you have " + tasks.size() + " tasks in the list.");

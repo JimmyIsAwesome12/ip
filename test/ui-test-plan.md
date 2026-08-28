@@ -13,6 +13,19 @@ Positive and negative cases are interleaved on purpose, so a bug that
 corrupts internal state (e.g. an error path that still increments the task
 count) shows up in the very next positive case rather than being masked.
 
+Each test case runs in its own fresh working directory, so tasks the
+program saves to `data/lebron.txt` in one test case never carry over to the
+next. Two optional blocks support the save/load feature:
+
+- **Data file:** — contents written to `data/lebron.txt` *before* the run,
+  for testing that previously saved tasks are loaded on startup.
+- **Expected data file:** — contents `data/lebron.txt` must have *after*
+  the run, for testing that task-list changes are saved. An empty block
+  asserts the file is absent or empty.
+
+When present, these blocks come *after* the Commands and Expected output
+blocks.
+
 ## Test Case: Greet and exit
 
 - **Aim:** The program greets the user and exits cleanly on `bye` with no
@@ -358,4 +371,137 @@ count) shows up in the very next positive case rather than being masked.
   ____________________________________________________________
   Bye. Hope to see you again soon!
   ____________________________________________________________
+  ```
+
+## Test Case: Start with no saved data file
+
+- **Aim:** On the very first run (no `data/` folder or data file exists),
+  the program starts with an empty task list instead of crashing.
+- **Commands:**
+  ```
+  list
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  Here are the tasks in your list:
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+
+## Test Case: Load tasks saved from a previous session
+
+- **Aim:** Tasks stored in `data/lebron.txt` are read back on startup,
+  preserving their order and done status, so `list` shows them immediately.
+- **Commands:**
+  ```
+  list
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  Here are the tasks in your list:
+  1.[ ] read book
+  2.[X] return book
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+- **Data file:**
+  ```
+  T | 0 | read book
+  T | 1 | return book
+  ```
+
+## Test Case: Recover from a corrupted data file
+
+- **Aim:** A data file containing a line that is not in the expected format
+  loads the valid lines anyway and prints a single warning, rather than
+  crashing or discarding everything (stretch goal).
+- **Commands:**
+  ```
+  list
+  bye
+  ```
+- **Expected output:**
+  ```
+  OOPS!!! Skipped 1 unreadable line(s) in your data file.
+  ____________________________________________________________
+  Here are the tasks in your list:
+  1.[ ] read book
+  2.[X] return book
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+- **Data file:**
+  ```
+  T | 0 | read book
+  this is not a valid line
+  T | 1 | return book
+  ```
+
+## Test Case: Save the task list after a change
+
+- **Aim:** Adding and then marking a task writes the current list to
+  `data/lebron.txt` in the expected format, so the change survives a
+  restart.
+- **Commands:**
+  ```
+  todo read book
+  mark 1
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  added: read book
+  ____________________________________________________________
+  ____________________________________________________________
+  Nice! I've marked this task as done:
+    [X] read book
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+- **Expected data file:**
+  ```
+  T | 1 | read book
+  ```
+
+## Test Case: Save the task list after a deletion
+
+- **Aim:** Deleting a task rewrites `data/lebron.txt` without the removed
+  task, so the deletion is persisted rather than only applied in memory.
+- **Commands:**
+  ```
+  delete 1
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  Noted. I've removed this task:
+    [ ] read book
+  Now you have 1 tasks in the list.
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+- **Data file:**
+  ```
+  T | 0 | read book
+  T | 1 | return book
+  ```
+- **Expected data file:**
+  ```
+  T | 1 | return book
   ```
