@@ -1,3 +1,5 @@
+package lebron.task;
+
 /** A task that spans a period, from a start date/time to an end date/time. */
 public class Event extends Task {
     private final DateTime from;

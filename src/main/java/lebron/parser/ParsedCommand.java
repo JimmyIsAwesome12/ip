@@ -1,3 +1,7 @@
+package lebron.parser;
+
+import lebron.task.Task;
+
 /**
  * The result of {@link Parser#parse(String)}: a command the user typed,
  * reduced to a type plus whatever typed data that command needs.
