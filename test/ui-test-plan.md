@@ -91,10 +91,10 @@ blocks.
 
 ## Test Case: Reject an unrecognised command
 
-- **Aim:** Input that isn't `list`, `todo`, `mark`, `unmark`, or `bye` is
-  rejected with an error instead of silently being treated as a task (this
-  also confirms the rejected line was not added as a task -- verified by the
-  next test case starting from an empty list).
+- **Aim:** Input that isn't a known command keyword is rejected with an
+  error instead of silently being treated as a task (this also confirms the
+  rejected line was not added as a task -- verified by the next test case
+  starting from an empty list).
 - **Commands:**
   ```
   blah
@@ -103,7 +103,7 @@ blocks.
 - **Expected output:**
   ```
   ____________________________________________________________
-  OOPS!!! I don't understand that command. Try: list, todo, mark, unmark, delete, or bye.
+  OOPS!!! I don't understand that command. Try: list, todo, deadline, event, mark, unmark, delete, or bye.
   ____________________________________________________________
   ____________________________________________________________
   Bye. Hope to see you again soon!
@@ -504,4 +504,201 @@ blocks.
 - **Expected data file:**
   ```
   T | 1 | return book
+  ```
+
+## Test Case: Add a deadline with a date only
+
+- **Aim:** `deadline <desc> /by <yyyy-mm-dd>` parses the date and prints it
+  back in `MMM dd yyyy` form (not as the raw input string).
+- **Commands:**
+  ```
+  deadline return book /by 2019-12-02
+  list
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  added: [D][ ] return book (by: Dec 02 2019)
+  ____________________________________________________________
+  ____________________________________________________________
+  Here are the tasks in your list:
+  1.[D][ ] return book (by: Dec 02 2019)
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+- **Expected data file:**
+  ```
+  D | 0 | return book | 2019-12-02
+  ```
+
+## Test Case: Add a deadline with a date and time
+
+- **Aim:** A `HHmm` time after the date is parsed and shown as a 12-hour
+  clock time, e.g. `1800` becomes `6:00pm`.
+- **Commands:**
+  ```
+  deadline submit report /by 2019-12-02 1800
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  added: [D][ ] submit report (by: Dec 02 2019 6:00pm)
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+- **Expected data file:**
+  ```
+  D | 0 | submit report | 2019-12-02 1800
+  ```
+
+## Test Case: Accept the day-first date format from the requirement
+
+- **Aim:** The `d/M/yyyy HHmm` form (`2/12/2019 1800` = 2 Dec 2019, 6pm)
+  from the requirement's example is understood and normalised.
+- **Commands:**
+  ```
+  deadline pay bill /by 2/12/2019 1800
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  added: [D][ ] pay bill (by: Dec 02 2019 6:00pm)
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+- **Expected data file:**
+  ```
+  D | 0 | pay bill | 2019-12-02 1800
+  ```
+
+## Test Case: Add an event with start and end date-times
+
+- **Aim:** `event <desc> /from <date> /to <date>` parses both endpoints.
+- **Commands:**
+  ```
+  event project meeting /from 2019-12-02 1400 /to 2019-12-02 1600
+  list
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  added: [E][ ] project meeting (from: Dec 02 2019 2:00pm to: Dec 02 2019 4:00pm)
+  ____________________________________________________________
+  ____________________________________________________________
+  Here are the tasks in your list:
+  1.[E][ ] project meeting (from: Dec 02 2019 2:00pm to: Dec 02 2019 4:00pm)
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+- **Expected data file:**
+  ```
+  E | 0 | project meeting | 2019-12-02 1400 | 2019-12-02 1600
+  ```
+
+## Test Case: Reject a deadline with a missing /by
+
+- **Aim:** `deadline` without a `/by` section is rejected with a usage hint
+  rather than being stored with no date.
+- **Commands:**
+  ```
+  deadline return book
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  OOPS!!! A deadline needs a description and a /by date, e.g. deadline return book /by 2019-12-02 1800
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+
+## Test Case: Reject a deadline with an unparseable date
+
+- **Aim:** A `/by` value that matches none of the accepted date formats is
+  rejected with an error instead of crashing or storing a bad task.
+- **Commands:**
+  ```
+  deadline return book /by someday
+  list
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  OOPS!!! I don't understand the date 'someday'. Try e.g. 2019-12-02 or 2019-12-02 1800.
+  ____________________________________________________________
+  ____________________________________________________________
+  Here are the tasks in your list:
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+
+## Test Case: Load deadlines and events saved from a previous session
+
+- **Aim:** `D` and `E` lines in the data file are read back into the right
+  task types, with their dates re-formatted for display and their done
+  status preserved.
+- **Commands:**
+  ```
+  list
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  Here are the tasks in your list:
+  1.[D][X] return book (by: Dec 02 2019 6:00pm)
+  2.[E][ ] camp (from: Jun 01 2019 to: Jun 03 2019)
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+- **Data file:**
+  ```
+  D | 1 | return book | 2019-12-02 1800
+  E | 0 | camp | 2019-06-01 | 2019-06-03
+  ```
+
+## Test Case: Skip a data-file line with a corrupted date
+
+- **Aim:** A `D` line whose date field is not a valid date is treated as
+  corruption -- skipped with a warning -- while the other tasks still load
+  (stretch goal).
+- **Commands:**
+  ```
+  list
+  bye
+  ```
+- **Expected output:**
+  ```
+  OOPS!!! Skipped 1 unreadable line(s) in your data file.
+  ____________________________________________________________
+  Here are the tasks in your list:
+  1.[D][ ] return book (by: Dec 02 2019)
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+- **Data file:**
+  ```
+  D | 0 | return book | 2019-12-02
+  D | 0 | pay rent | last tuesday
   ```

@@ -12,7 +12,7 @@ public class Lebron {
             + "|_____|_____|____/|_| \\_\\\\___/|_| \\_|\n";
 
     private enum Command {
-        LIST, TODO, MARK, UNMARK, DELETE, BYE, UNKNOWN;
+        LIST, TODO, DEADLINE, EVENT, MARK, UNMARK, DELETE, BYE, UNKNOWN;
 
         static Command fromKeyword(String keyword) {
             switch (keyword) {
@@ -20,6 +20,10 @@ public class Lebron {
                 return LIST;
             case "todo":
                 return TODO;
+            case "deadline":
+                return DEADLINE;
+            case "event":
+                return EVENT;
             case "mark":
                 return MARK;
             case "unmark":
@@ -58,6 +62,66 @@ public class Lebron {
             return null;
         }
         return index;
+    }
+
+    /**
+     * Builds a {@link Deadline} from the text after the {@code deadline}
+     * keyword, expected to be {@code <description> /by <date>}. Prints an
+     * OOPS!!! message and returns null if the description or date is missing
+     * or the date cannot be understood.
+     */
+    private static Task parseDeadline(String arguments) {
+        String usage = "OOPS!!! A deadline needs a description and a /by date, "
+                + "e.g. deadline return book /by 2019-12-02 1800";
+        int byIndex = arguments.indexOf("/by");
+        if (byIndex == -1) {
+            System.out.println(usage);
+            return null;
+        }
+        String description = arguments.substring(0, byIndex).trim();
+        String by = arguments.substring(byIndex + "/by".length()).trim();
+        if (description.isEmpty() || by.isEmpty()) {
+            System.out.println(usage);
+            return null;
+        }
+        try {
+            return new Deadline(description, DateTime.parse(by));
+        } catch (IllegalArgumentException e) {
+            System.out.println("OOPS!!! I don't understand the date '" + by
+                    + "'. Try e.g. 2019-12-02 or 2019-12-02 1800.");
+            return null;
+        }
+    }
+
+    /**
+     * Builds an {@link Event} from the text after the {@code event} keyword,
+     * expected to be {@code <description> /from <start> /to <end>}. Prints an
+     * OOPS!!! message and returns null if a part is missing or a date cannot
+     * be understood.
+     */
+    private static Task parseEvent(String arguments) {
+        String usage = "OOPS!!! An event needs a description, a /from and a /to date, "
+                + "e.g. event project meeting /from 2019-12-02 1400 /to 2019-12-02 1600";
+        int fromIndex = arguments.indexOf("/from");
+        int toIndex = arguments.indexOf("/to");
+        if (fromIndex == -1 || toIndex == -1 || toIndex < fromIndex) {
+            System.out.println(usage);
+            return null;
+        }
+        String description = arguments.substring(0, fromIndex).trim();
+        String from = arguments.substring(fromIndex + "/from".length(), toIndex).trim();
+        String to = arguments.substring(toIndex + "/to".length()).trim();
+        if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
+            System.out.println(usage);
+            return null;
+        }
+        try {
+            return new Event(description, DateTime.parse(from), DateTime.parse(to));
+        } catch (IllegalArgumentException e) {
+            System.out.println("OOPS!!! I don't understand one of those dates. "
+                    + "Try e.g. 2019-12-02 or 2019-12-02 1800.");
+            return null;
+        }
     }
 
     public static void main(String[] args) {
@@ -99,11 +163,23 @@ public class Lebron {
                 if (arguments.isEmpty()) {
                     System.out.println("OOPS!!! A todo needs a description, e.g. todo read book");
                 } else {
-                    tasks.add(new Task(arguments));
+                    tasks.add(new Todo(arguments));
                     storage.save(tasks);
                     System.out.println("added: " + arguments);
                 }
                 break;
+            case DEADLINE:
+            case EVENT: {
+                Task task = command == Command.DEADLINE
+                        ? parseDeadline(arguments)
+                        : parseEvent(arguments);
+                if (task != null) {
+                    tasks.add(task);
+                    storage.save(tasks);
+                    System.out.println("added: " + task);
+                }
+                break;
+            }
             case MARK:
             case UNMARK: {
                 Integer index = parseTaskIndex(arguments, keyword, tasks.size());
@@ -133,7 +209,7 @@ public class Lebron {
             }
             default:
                 System.out.println("OOPS!!! I don't understand that command. "
-                        + "Try: list, todo, mark, unmark, delete, or bye.");
+                        + "Try: list, todo, deadline, event, mark, unmark, delete, or bye.");
                 break;
             }
             System.out.println(LINE);
