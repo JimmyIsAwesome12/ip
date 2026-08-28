@@ -1,0 +1,9 @@
+/**
+ * Signals an expected, user-facing problem (e.g. a task number that is out
+ * of range). The message is written so it can be shown to the user as-is.
+ */
+public class LebronException extends Exception {
+    public LebronException(String message) {
+        super(message);
+    }
+}

@@ -72,9 +72,9 @@ public class Storage {
      * not crash the program, so a save problem never loses the in-memory
      * list mid-session.
      */
-    public void save(List<Task> tasks) {
+    public void save(TaskList tasks) {
         List<String> lines = new ArrayList<>();
-        for (Task task : tasks) {
+        for (Task task : tasks.asList()) {
             lines.add(task.toFileFormat());
         }
         try {

@@ -1,0 +1,85 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * The in-memory list of tasks, with operations to add, delete, and change
+ * the done-status of tasks.
+ *
+ * <p>Task numbers used by the commands are 1-based; this class does the
+ * range checking in one place and throws {@link LebronException} (with a
+ * ready-to-show message) when a number is out of range, so callers never
+ * index the underlying list directly.
+ */
+public class TaskList {
+    private final ArrayList<Task> tasks;
+
+    /** Creates an empty list. */
+    public TaskList() {
+        this.tasks = new ArrayList<>();
+    }
+
+    /** Creates a list holding the given tasks (e.g. the ones just loaded). */
+    public TaskList(ArrayList<Task> tasks) {
+        this.tasks = tasks;
+    }
+
+    public int size() {
+        return tasks.size();
+    }
+
+    /** Adds a task to the end of the list. */
+    public void add(Task task) {
+        tasks.add(task);
+    }
+
+    /**
+     * Removes and returns the task at the given 1-based position.
+     *
+     * @throws LebronException if {@code oneBasedIndex} is not a valid position
+     */
+    public Task delete(int oneBasedIndex) throws LebronException {
+        checkIndex(oneBasedIndex);
+        return tasks.remove(oneBasedIndex - 1);
+    }
+
+    /**
+     * Marks the task at the given 1-based position as done and returns it.
+     *
+     * @throws LebronException if {@code oneBasedIndex} is not a valid position
+     */
+    public Task mark(int oneBasedIndex) throws LebronException {
+        Task task = get(oneBasedIndex);
+        task.markAsDone();
+        return task;
+    }
+
+    /**
+     * Marks the task at the given 1-based position as not done and returns it.
+     *
+     * @throws LebronException if {@code oneBasedIndex} is not a valid position
+     */
+    public Task unmark(int oneBasedIndex) throws LebronException {
+        Task task = get(oneBasedIndex);
+        task.markAsNotDone();
+        return task;
+    }
+
+    /** Returns the task at the given 1-based position. */
+    public Task get(int oneBasedIndex) throws LebronException {
+        checkIndex(oneBasedIndex);
+        return tasks.get(oneBasedIndex - 1);
+    }
+
+    /** Returns an unmodifiable view of the tasks, in order, for reading. */
+    public List<Task> asList() {
+        return Collections.unmodifiableList(tasks);
+    }
+
+    private void checkIndex(int oneBasedIndex) throws LebronException {
+        if (oneBasedIndex < 1 || oneBasedIndex > tasks.size()) {
+            throw new LebronException("OOPS!!! There is no task " + oneBasedIndex
+                    + " in your list. You have " + tasks.size() + " task(s).");
+        }
+    }
+}
