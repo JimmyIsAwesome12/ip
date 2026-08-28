@@ -1,3 +1,5 @@
+package lebron.ui;
+
 import java.util.Scanner;
 
 /**
