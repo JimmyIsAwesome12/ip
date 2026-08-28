@@ -1,6 +1,6 @@
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.List;
 
 public class Lebron {
     private enum Command {
@@ -32,28 +32,21 @@ public class Lebron {
 
     /**
      * Parses a 1-based task index out of {@code arguments}, showing an
-     * OOPS!!! error and returning null if it is missing, not a number, or
-     * out of range for the given task count.
+     * OOPS!!! error and returning null if it is missing or not a number.
+     * Range checking is done later by {@link TaskList}.
      */
-    private static Integer parseTaskIndex(String arguments, String keyword, int taskCount, Ui ui) {
+    private static Integer parseTaskIndex(String arguments, String keyword, Ui ui) {
         if (arguments.isEmpty()) {
             ui.showMessage("OOPS!!! Tell me which task number to " + keyword
                     + ", e.g. " + keyword + " 2");
             return null;
         }
-        int index;
         try {
-            index = Integer.parseInt(arguments);
+            return Integer.parseInt(arguments);
         } catch (NumberFormatException e) {
             ui.showMessage("OOPS!!! '" + arguments + "' doesn't look like a task number.");
             return null;
         }
-        if (index < 1 || index > taskCount) {
-            ui.showMessage("OOPS!!! There is no task " + index
-                    + " in your list. You have " + taskCount + " task(s).");
-            return null;
-        }
-        return index;
     }
 
     /**
@@ -125,7 +118,7 @@ public class Lebron {
         // Storage handles the file/folder not existing yet.
         Path dataFile = Paths.get("data", "lebron.txt");
         Storage storage = new Storage(dataFile);
-        ArrayList<Task> tasks = storage.load();
+        TaskList tasks = new TaskList(storage.load());
 
         while (true) {
             String input = ui.readCommand();
@@ -140,65 +133,70 @@ public class Lebron {
             }
 
             ui.showLine();
-            switch (command) {
-            case LIST:
-                ui.showMessage("Here are the tasks in your list:");
-                for (int i = 0; i < tasks.size(); i++) {
-                    ui.showMessage((i + 1) + "." + tasks.get(i));
+            try {
+                switch (command) {
+                case LIST: {
+                    List<Task> all = tasks.asList();
+                    ui.showMessage("Here are the tasks in your list:");
+                    for (int i = 0; i < all.size(); i++) {
+                        ui.showMessage((i + 1) + "." + all.get(i));
+                    }
+                    break;
                 }
-                break;
-            case TODO:
-                if (arguments.isEmpty()) {
-                    ui.showMessage("OOPS!!! A todo needs a description, e.g. todo read book");
-                } else {
-                    tasks.add(new Todo(arguments));
-                    storage.save(tasks);
-                    ui.showMessage("added: " + arguments);
+                case TODO:
+                    if (arguments.isEmpty()) {
+                        ui.showMessage("OOPS!!! A todo needs a description, e.g. todo read book");
+                    } else {
+                        tasks.add(new Todo(arguments));
+                        storage.save(tasks);
+                        ui.showMessage("added: " + arguments);
+                    }
+                    break;
+                case DEADLINE:
+                case EVENT: {
+                    Task task = command == Command.DEADLINE
+                            ? parseDeadline(arguments, ui)
+                            : parseEvent(arguments, ui);
+                    if (task != null) {
+                        tasks.add(task);
+                        storage.save(tasks);
+                        ui.showMessage("added: " + task);
+                    }
+                    break;
                 }
-                break;
-            case DEADLINE:
-            case EVENT: {
-                Task task = command == Command.DEADLINE
-                        ? parseDeadline(arguments, ui)
-                        : parseEvent(arguments, ui);
-                if (task != null) {
-                    tasks.add(task);
-                    storage.save(tasks);
-                    ui.showMessage("added: " + task);
+                case MARK:
+                case UNMARK: {
+                    Integer index = parseTaskIndex(arguments, keyword, ui);
+                    if (index != null) {
+                        Task task = command == Command.MARK
+                                ? tasks.mark(index)
+                                : tasks.unmark(index);
+                        storage.save(tasks);
+                        ui.showMessage(command == Command.MARK
+                                ? "Nice! I've marked this task as done:"
+                                : "OK, I've marked this task as not done yet:");
+                        ui.showMessage("  " + task);
+                    }
+                    break;
                 }
-                break;
-            }
-            case MARK:
-            case UNMARK: {
-                Integer index = parseTaskIndex(arguments, keyword, tasks.size(), ui);
-                if (index != null && command == Command.MARK) {
-                    tasks.get(index - 1).markAsDone();
-                    storage.save(tasks);
-                    ui.showMessage("Nice! I've marked this task as done:");
-                    ui.showMessage("  " + tasks.get(index - 1));
-                } else if (index != null) {
-                    tasks.get(index - 1).markAsNotDone();
-                    storage.save(tasks);
-                    ui.showMessage("OK, I've marked this task as not done yet:");
-                    ui.showMessage("  " + tasks.get(index - 1));
+                case DELETE: {
+                    Integer index = parseTaskIndex(arguments, keyword, ui);
+                    if (index != null) {
+                        Task removed = tasks.delete(index);
+                        storage.save(tasks);
+                        ui.showMessage("Noted. I've removed this task:");
+                        ui.showMessage("  " + removed);
+                        ui.showMessage("Now you have " + tasks.size() + " tasks in the list.");
+                    }
+                    break;
                 }
-                break;
-            }
-            case DELETE: {
-                Integer index = parseTaskIndex(arguments, keyword, tasks.size(), ui);
-                if (index != null) {
-                    Task removed = tasks.remove(index - 1);
-                    storage.save(tasks);
-                    ui.showMessage("Noted. I've removed this task:");
-                    ui.showMessage("  " + removed);
-                    ui.showMessage("Now you have " + tasks.size() + " tasks in the list.");
+                default:
+                    ui.showMessage("OOPS!!! I don't understand that command. "
+                            + "Try: list, todo, deadline, event, mark, unmark, delete, or bye.");
+                    break;
                 }
-                break;
-            }
-            default:
-                ui.showMessage("OOPS!!! I don't understand that command. "
-                        + "Try: list, todo, deadline, event, mark, unmark, delete, or bye.");
-                break;
+            } catch (LebronException e) {
+                ui.showMessage(e.getMessage());
             }
             ui.showLine();
         }
