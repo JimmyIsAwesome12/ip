@@ -77,6 +77,12 @@ public class Lebron {
         }
     }
 
+    /**
+     * Sets up the UI, storage and task list, then reads and runs commands
+     * until the user exits.
+     *
+     * @param args command-line arguments (unused)
+     */
     public static void main(String[] args) {
         Ui ui = new Ui();
         ui.showWelcome();

@@ -22,6 +22,11 @@ import lebron.task.TaskList;
 public class Storage {
     private final Path file;
 
+    /**
+     * Creates a storage bound to the given data file.
+     *
+     * @param file the path tasks are read from and written to
+     */
     public Storage(Path file) {
         this.file = file;
     }

@@ -78,6 +78,10 @@ public class DateTime {
                 : LocalDateTime.of(date, time).format(FILE_DATE_TIME);
     }
 
+    /**
+     * Returns the friendly display form, e.g. {@code Oct 15 2019} or
+     * {@code Dec 02 2019 6:00pm}.
+     */
     @Override
     public String toString() {
         String shown = date.format(DATE_OUTPUT);
