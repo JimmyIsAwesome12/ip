@@ -15,9 +15,15 @@ import lebron.task.Task;
  * be shown to the user.
  */
 public class Parser {
+    /** This is a utility class and is not meant to be instantiated. */
+    private Parser() {
+    }
+
     /**
-     * Parses one full command line.
+     * Parses one full command line into the command it represents.
      *
+     * @param fullCommand the raw line the user typed
+     * @return the parsed command, ready to be carried out
      * @throws LebronException if the line is not a command the chatbot
      *     understands, or a required part is missing or malformed
      */
@@ -28,36 +34,38 @@ public class Parser {
         String arguments = spaceIndex == -1 ? "" : trimmed.substring(spaceIndex + 1).trim();
 
         switch (keyword) {
-        case "list":
-            return ParsedCommand.list();
-        case "bye":
-            return ParsedCommand.bye();
-        case "todo":
-            if (arguments.isEmpty()) {
-                throw new LebronException("OOPS!!! A todo needs a description, e.g. todo read book");
-            }
-            return ParsedCommand.todo(arguments);
-        case "deadline":
-            return ParsedCommand.ofTask(ParsedCommand.Type.DEADLINE, parseDeadline(arguments));
-        case "event":
-            return ParsedCommand.ofTask(ParsedCommand.Type.EVENT, parseEvent(arguments));
-        case "mark":
-            return ParsedCommand.ofIndex(ParsedCommand.Type.MARK, parseTaskIndex(arguments, "mark"));
-        case "unmark":
-            return ParsedCommand.ofIndex(ParsedCommand.Type.UNMARK, parseTaskIndex(arguments, "unmark"));
-        case "delete":
-            return ParsedCommand.ofIndex(ParsedCommand.Type.DELETE, parseTaskIndex(arguments, "delete"));
-        default:
-            throw new LebronException("OOPS!!! I don't understand that command. "
-                    + "Try: list, todo, deadline, event, mark, unmark, delete, or bye.");
+            case "list":
+                return ParsedCommand.list();
+            case "bye":
+                return ParsedCommand.bye();
+            case "todo":
+                if (arguments.isEmpty()) {
+                    throw new LebronException("OOPS!!! A todo needs a description, e.g. todo read book");
+                }
+                return ParsedCommand.todo(arguments);
+            case "deadline":
+                return ParsedCommand.ofTask(ParsedCommand.Type.DEADLINE, parseDeadline(arguments));
+            case "event":
+                return ParsedCommand.ofTask(ParsedCommand.Type.EVENT, parseEvent(arguments));
+            case "mark":
+                return ParsedCommand.ofIndex(ParsedCommand.Type.MARK, parseTaskIndex(arguments, "mark"));
+            case "unmark":
+                return ParsedCommand.ofIndex(ParsedCommand.Type.UNMARK, parseTaskIndex(arguments, "unmark"));
+            case "delete":
+                return ParsedCommand.ofIndex(ParsedCommand.Type.DELETE, parseTaskIndex(arguments, "delete"));
+            default:
+                throw new LebronException("OOPS!!! I don't understand that command. "
+                        + "Try: list, todo, deadline, event, mark, unmark, delete, or bye.");
         }
     }
 
     /**
-     * Parses a 1-based task index out of {@code arguments}.
+     * Parses a 1-based task index out of the given arguments.
      *
-     * @throws LebronException if it is missing or not a number (range
-     *     checking is left to {@link TaskList})
+     * @param arguments the text after the command keyword
+     * @param keyword the command keyword, used only in the error message
+     * @return the task number as typed (range checking is left to {@code TaskList})
+     * @throws LebronException if the argument is missing or not a number
      */
     private static int parseTaskIndex(String arguments, String keyword) throws LebronException {
         if (arguments.isEmpty()) {
@@ -74,6 +82,8 @@ public class Parser {
     /**
      * Builds a {@link Deadline} from {@code <description> /by <date>}.
      *
+     * @param arguments the text after the {@code deadline} keyword
+     * @return the deadline task
      * @throws LebronException if the description or date is missing or the
      *     date cannot be understood
      */
@@ -100,6 +110,8 @@ public class Parser {
     /**
      * Builds an {@link Event} from {@code <description> /from <start> /to <end>}.
      *
+     * @param arguments the text after the {@code event} keyword
+     * @return the event task
      * @throws LebronException if a part is missing or a date cannot be
      *     understood
      */

@@ -8,9 +8,16 @@ package lebron.task;
  * encoded for the data file.
  */
 public abstract class Task {
+    /** What the task is about. */
     protected String description;
+    /** Whether the task has been completed. */
     protected boolean isDone;
 
+    /**
+     * Creates a task with the given description, initially not done.
+     *
+     * @param description what the task is about
+     */
     protected Task(String description) {
         this.description = description;
         this.isDone = false;
@@ -21,7 +28,7 @@ public abstract class Task {
     }
 
     public String getStatusIcon() {
-        return (isDone ? "X" : " "); // mark done task with X
+        return isDone ? "X" : " "; // mark done task with X
     }
 
     public void markAsDone() {
@@ -41,6 +48,8 @@ public abstract class Task {
      * Returns this task encoded as one line for the data file. The first
      * field is a single-letter type tag ({@code T}, {@code D}, {@code E})
      * that {@link #fromFileFormat(String)} dispatches on.
+     *
+     * @return the data-file line for this task
      */
     public abstract String toFileFormat();
 
@@ -49,6 +58,8 @@ public abstract class Task {
      * {@link #toFileFormat()}, choosing the subclass from the leading type
      * field.
      *
+     * @param line one line of the data file
+     * @return the task the line describes
      * @throws IllegalArgumentException if the line is not in the expected
      *     format (wrong field count, unknown type, bad done flag, empty
      *     description, or an unparseable date). Callers use this to detect a
@@ -68,20 +79,21 @@ public abstract class Task {
 
         Task task;
         switch (type) {
-        case "T":
-            requireFieldCount(parts, 3);
-            task = new Todo(description);
-            break;
-        case "D":
-            requireFieldCount(parts, 4);
-            task = new Deadline(description, DateTime.parse(parts[3].trim()));
-            break;
-        case "E":
-            requireFieldCount(parts, 5);
-            task = new Event(description, DateTime.parse(parts[3].trim()), DateTime.parse(parts[4].trim()));
-            break;
-        default:
-            throw new IllegalArgumentException("unknown task type '" + type + "'");
+            case "T":
+                requireFieldCount(parts, 3);
+                task = new Todo(description);
+                break;
+            case "D":
+                requireFieldCount(parts, 4);
+                task = new Deadline(description, DateTime.parse(parts[3].trim()));
+                break;
+            case "E":
+                requireFieldCount(parts, 5);
+                task = new Event(description,
+                        DateTime.parse(parts[3].trim()), DateTime.parse(parts[4].trim()));
+                break;
+            default:
+                throw new IllegalArgumentException("unknown task type '" + type + "'");
         }
         if (done) {
             task.markAsDone();

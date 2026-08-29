@@ -4,6 +4,12 @@ package lebron.task;
 public class Deadline extends Task {
     private final DateTime by;
 
+    /**
+     * Creates a deadline task.
+     *
+     * @param description what needs to be done
+     * @param by when it is due
+     */
     public Deadline(String description, DateTime by) {
         super(description);
         this.by = by;

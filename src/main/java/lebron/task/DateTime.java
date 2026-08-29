@@ -45,6 +45,8 @@ public class DateTime {
     /**
      * Parses user input such as {@code 2019-10-15} or {@code 2/12/2019 1800}.
      *
+     * @param input the date (optionally with a time) as the user typed it
+     * @return the parsed date/time
      * @throws IllegalArgumentException if none of the accepted formats match;
      *     callers turn this into a user-facing error message
      */

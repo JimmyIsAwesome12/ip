@@ -28,14 +28,21 @@ public class ParsedCommand {
         this.index = index;
     }
 
+    /** Returns a command that lists every task. */
     public static ParsedCommand list() {
         return new ParsedCommand(Type.LIST, null, null, 0);
     }
 
+    /** Returns a command that exits the program. */
     public static ParsedCommand bye() {
         return new ParsedCommand(Type.BYE, null, null, 0);
     }
 
+    /**
+     * Returns a command that adds a todo.
+     *
+     * @param description the todo's description
+     */
     public static ParsedCommand todo(String description) {
         return new ParsedCommand(Type.TODO, description, null, 0);
     }
