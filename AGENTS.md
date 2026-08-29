@@ -40,3 +40,11 @@ After each update to the program's code, before considering the change done:
 
 1. Update `test/ui-test-plan.md` if the change affects console behavior (new/changed commands, output format, etc.) — add or edit test cases so the plan still reflects expected behavior. No edit is needed for changes that don't affect the UI (e.g. pure refactors).
 2. Invoke the `test-ui` skill to run the test plan against the program. If a test case fails, stop and fix the issue (or the test case, if the new behavior is intentional) before proceeding.
+3. Update the JUnit tests under `src/test/java` so they still meet the coverage target below, then run `./gradlew test` and make sure it passes.
+
+## JUnit test coverage
+
+- **Target: cover roughly the top 50% highest-value methods** — the complex, core, or business-critical ones (currently: command parsing, the data-file format, `TaskList` operations, and date/time handling). Trivial getters, thin I/O wrappers (`Ui`), simple value objects (`ParsedCommand`), and glue code (`Lebron.main`) do not need dedicated tests.
+- **JUnit tests must be kept up to date after every code change** to keep meeting this target: add tests for any new high-value method, and revise existing tests whose expected values the change alters. A code change is not done until `./gradlew test` passes.
+- Test classes mirror the package of the class under test and are named `<ClassName>Test` (Gradle/JUnit convention), e.g. `lebron.parser.Parser` → `src/test/java/lebron/parser/ParserTest.java`.
+- Long test method names may use the `featureUnderTest_scenario_expectedBehavior()` convention, e.g. `parse_todoWithoutDescription_throws()`.
