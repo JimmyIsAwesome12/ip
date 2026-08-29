@@ -28,14 +28,21 @@ public class ParsedCommand {
         this.index = index;
     }
 
+    /** Returns a command that lists all tasks. */
     public static ParsedCommand list() {
         return new ParsedCommand(Type.LIST, null, null, 0);
     }
 
+    /** Returns a command that ends the program. */
     public static ParsedCommand bye() {
         return new ParsedCommand(Type.BYE, null, null, 0);
     }
 
+    /**
+     * Returns an "add todo" command.
+     *
+     * @param description the todo's description
+     */
     public static ParsedCommand todo(String description) {
         return new ParsedCommand(Type.TODO, description, null, 0);
     }
@@ -50,18 +57,22 @@ public class ParsedCommand {
         return new ParsedCommand(type, null, null, oneBasedIndex);
     }
 
+    /** Returns which kind of command this is. */
     public Type getType() {
         return type;
     }
 
+    /** Returns the todo description; meaningful only for {@code TODO}. */
     public String getDescription() {
         return description;
     }
 
+    /** Returns the pre-built task; meaningful only for {@code DEADLINE}/{@code EVENT}. */
     public Task getTask() {
         return task;
     }
 
+    /** Returns the 1-based task number; meaningful only for {@code MARK}/{@code UNMARK}/{@code DELETE}. */
     public int getIndex() {
         return index;
     }

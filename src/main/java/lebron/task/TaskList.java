@@ -28,6 +28,7 @@ public class TaskList {
         this.tasks = tasks;
     }
 
+    /** Returns the number of tasks in the list. */
     public int size() {
         return tasks.size();
     }

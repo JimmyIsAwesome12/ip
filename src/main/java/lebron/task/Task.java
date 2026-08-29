@@ -11,23 +11,32 @@ public abstract class Task {
     protected String description;
     protected boolean isDone;
 
+    /**
+     * Initialises the description and marks the task not done.
+     *
+     * @param description what the task is about
+     */
     protected Task(String description) {
         this.description = description;
         this.isDone = false;
     }
 
+    /** Returns the task's description text. */
     public String getDescription() {
         return description;
     }
 
+    /** Returns {@code "X"} if the task is done, or a single space otherwise. */
     public String getStatusIcon() {
         return (isDone ? "X" : " "); // mark done task with X
     }
 
+    /** Marks this task as done. */
     public void markAsDone() {
         isDone = true;
     }
 
+    /** Marks this task as not done. */
     public void markAsNotDone() {
         isDone = false;
     }
@@ -106,6 +115,7 @@ public abstract class Task {
         }
     }
 
+    /** Returns the display form, e.g. {@code [X] read book}. */
     @Override
     public String toString() {
         return "[" + getStatusIcon() + "] " + description;
