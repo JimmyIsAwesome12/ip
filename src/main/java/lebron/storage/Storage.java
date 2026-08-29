@@ -25,7 +25,7 @@ public class Storage {
     /**
      * Creates a storage bound to the given data file.
      *
-     * @param file the path tasks are read from and written to
+     * @param file the file path tasks are read from and written to
      */
     public Storage(Path file) {
         this.file = file;
@@ -40,6 +40,8 @@ public class Storage {
      * expected format are skipped rather than aborting the load, and a
      * single summary warning is printed, so a partially corrupted file
      * still recovers as many tasks as possible.
+     *
+     * @return the loaded tasks, or an empty list if there is nothing to load
      */
     public ArrayList<Task> load() {
         ArrayList<Task> tasks = new ArrayList<>();
@@ -81,6 +83,8 @@ public class Storage {
      * does not exist yet. Any I/O failure is reported to the user but does
      * not crash the program, so a save problem never loses the in-memory
      * list mid-session.
+     *
+     * @param tasks the task list to write out
      */
     public void save(TaskList tasks) {
         List<String> lines = new ArrayList<>();

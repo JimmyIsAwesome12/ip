@@ -28,11 +28,15 @@ Unless the user says otherwise, assume that you are assisting a student working 
 
 Ensure that Java 25 is used when running the application or build tasks. On macOS, use `sdk use java 25.0.3.fx-zulu` to switch to Java 25 if needed.
 
+## Java coding standard
+
+All Java code in this project — new and edited — must comply with the SE-EDU intermediate Java coding standard. **Invoke the `seedu-java-coding-standard` skill before writing or reviewing Java code**, and check the result against it. Key points: 4-space indent, lines ≤ 120 chars, K&R braces on every block (even one-liners), `switch` cases indented from `switch`, explicit imports in the standard group order, predicate-style boolean names, and Javadoc on every class, every public method, every non-trivial private method, and `protected` fields.
+
 ## Git
 
 Use lightweight tags unless the user requests an annotated tag.
-When proposing or creating a commit message, include enough detail to explain the rationale for the change.
 Do not commit or push unless explicitly asked.
+All commit messages must follow the SE-EDU Git conventions — **invoke the `seedu-git-standard` skill before proposing a commit message or branch name**. In short: imperative-mood subject, capitalised, no trailing full stop, ≤ 50 chars; then a blank line and a body wrapped at 72 chars that explains what changed and why (not how); keep unrelated changes in separate commits (e.g. a code change and an agent-file change are two commits); branch names are kebab-case keywords.
 
 ## Testing after code changes
 

@@ -6,7 +6,7 @@ package lebron.exception;
  */
 public class LebronException extends Exception {
     /**
-     * Creates an exception whose message is safe to show to the user as-is.
+     * Creates an exception whose message can be shown to the user as-is.
      *
      * @param message the user-facing description of the problem
      */

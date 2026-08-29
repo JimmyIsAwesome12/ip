@@ -41,6 +41,8 @@ public class TaskList {
     /**
      * Removes and returns the task at the given 1-based position.
      *
+     * @param oneBasedIndex the task number as the user typed it
+     * @return the task that was removed
      * @throws LebronException if {@code oneBasedIndex} is not a valid position
      */
     public Task delete(int oneBasedIndex) throws LebronException {
@@ -51,6 +53,8 @@ public class TaskList {
     /**
      * Marks the task at the given 1-based position as done and returns it.
      *
+     * @param oneBasedIndex the task number as the user typed it
+     * @return the task that was marked
      * @throws LebronException if {@code oneBasedIndex} is not a valid position
      */
     public Task mark(int oneBasedIndex) throws LebronException {
@@ -62,6 +66,8 @@ public class TaskList {
     /**
      * Marks the task at the given 1-based position as not done and returns it.
      *
+     * @param oneBasedIndex the task number as the user typed it
+     * @return the task that was unmarked
      * @throws LebronException if {@code oneBasedIndex} is not a valid position
      */
     public Task unmark(int oneBasedIndex) throws LebronException {
@@ -70,7 +76,13 @@ public class TaskList {
         return task;
     }
 
-    /** Returns the task at the given 1-based position. */
+    /**
+     * Returns the task at the given 1-based position.
+     *
+     * @param oneBasedIndex the task number as the user typed it
+     * @return the task at that position
+     * @throws LebronException if {@code oneBasedIndex} is not a valid position
+     */
     public Task get(int oneBasedIndex) throws LebronException {
         checkIndex(oneBasedIndex);
         return tasks.get(oneBasedIndex - 1);
