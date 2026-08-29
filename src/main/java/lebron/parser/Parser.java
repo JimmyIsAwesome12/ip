@@ -37,6 +37,11 @@ public class Parser {
                 throw new LebronException("OOPS!!! A todo needs a description, e.g. todo read book");
             }
             return ParsedCommand.todo(arguments);
+        case "find":
+            if (arguments.isEmpty()) {
+                throw new LebronException("OOPS!!! Tell me what to search for, e.g. find book");
+            }
+            return ParsedCommand.find(arguments);
         case "deadline":
             return ParsedCommand.ofTask(ParsedCommand.Type.DEADLINE, parseDeadline(arguments));
         case "event":
@@ -49,7 +54,7 @@ public class Parser {
             return ParsedCommand.ofIndex(ParsedCommand.Type.DELETE, parseTaskIndex(arguments, "delete"));
         default:
             throw new LebronException("OOPS!!! I don't understand that command. "
-                    + "Try: list, todo, deadline, event, mark, unmark, delete, or bye.");
+                    + "Try: list, todo, deadline, event, mark, unmark, delete, find, or bye.");
         }
     }
 

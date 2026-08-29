@@ -80,6 +80,22 @@ public class TaskList {
         return Collections.unmodifiableList(tasks);
     }
 
+    /**
+     * Returns the tasks whose description contains {@code keyword}, in list
+     * order. Matching is case-sensitive.
+     *
+     * @param keyword the text to search for
+     */
+    public List<Task> find(String keyword) {
+        List<Task> matches = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.getDescription().contains(keyword)) {
+                matches.add(task);
+            }
+        }
+        return matches;
+    }
+
     private void checkIndex(int oneBasedIndex) throws LebronException {
         if (oneBasedIndex < 1 || oneBasedIndex > tasks.size()) {
             throw new LebronException("OOPS!!! There is no task " + oneBasedIndex

@@ -7,17 +7,17 @@ import lebron.task.Task;
  * reduced to a type plus whatever typed data that command needs.
  *
  * <p>Only the fields relevant to {@link #getType()} are meaningful:
- * {@code TODO} carries a description, {@code DEADLINE}/{@code EVENT} carry a
- * ready-built {@link Task}, and {@code MARK}/{@code UNMARK}/{@code DELETE}
- * carry a 1-based task number. Instances are created through the static
- * factory methods and are immutable.
+ * {@code TODO} carries a description, {@code FIND} carries a search keyword,
+ * {@code DEADLINE}/{@code EVENT} carry a ready-built {@link Task}, and
+ * {@code MARK}/{@code UNMARK}/{@code DELETE} carry a 1-based task number.
+ * Instances are created through the static factory methods and are immutable.
  */
 public class ParsedCommand {
     /** The kinds of command the chatbot understands. */
-    public enum Type { LIST, TODO, DEADLINE, EVENT, MARK, UNMARK, DELETE, BYE }
+    public enum Type { LIST, TODO, DEADLINE, EVENT, MARK, UNMARK, DELETE, FIND, BYE }
 
     private final Type type;
-    private final String description; // TODO
+    private final String description; // TODO, FIND (search keyword)
     private final Task task;          // DEADLINE, EVENT
     private final int index;          // MARK, UNMARK, DELETE
 
@@ -38,6 +38,11 @@ public class ParsedCommand {
 
     public static ParsedCommand todo(String description) {
         return new ParsedCommand(Type.TODO, description, null, 0);
+    }
+
+    /** For {@code FIND}, carrying the keyword to search task descriptions for. */
+    public static ParsedCommand find(String keyword) {
+        return new ParsedCommand(Type.FIND, keyword, null, 0);
     }
 
     /** For {@code DEADLINE} or {@code EVENT}, carrying the built task. */

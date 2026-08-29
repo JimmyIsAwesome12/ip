@@ -103,7 +103,7 @@ blocks.
 - **Expected output:**
   ```
   ____________________________________________________________
-  OOPS!!! I don't understand that command. Try: list, todo, deadline, event, mark, unmark, delete, or bye.
+  OOPS!!! I don't understand that command. Try: list, todo, deadline, event, mark, unmark, delete, find, or bye.
   ____________________________________________________________
   ____________________________________________________________
   Bye. Hope to see you again soon!
@@ -701,4 +701,85 @@ blocks.
   ```
   D | 0 | return book | 2019-12-02
   D | 0 | pay rent | last tuesday
+  ```
+
+## Test Case: Find tasks matching a keyword
+
+- **Aim:** `find <keyword>` lists the tasks whose description contains the
+  keyword, keeping their done status and displaying them like `list` (but
+  under a "matching tasks" heading), while leaving out non-matching tasks.
+- **Commands:**
+  ```
+  todo read book
+  todo return book
+  todo buy bread
+  mark 1
+  find book
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  added: read book
+  ____________________________________________________________
+  ____________________________________________________________
+  added: return book
+  ____________________________________________________________
+  ____________________________________________________________
+  added: buy bread
+  ____________________________________________________________
+  ____________________________________________________________
+  Nice! I've marked this task as done:
+    [X] read book
+  ____________________________________________________________
+  ____________________________________________________________
+  Here are the matching tasks in your list:
+  1.[X] read book
+  2.[ ] return book
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+
+## Test Case: Find with no matching tasks
+
+- **Aim:** `find` with a keyword that matches nothing prints the heading and
+  no task lines, rather than erroring.
+- **Commands:**
+  ```
+  todo read book
+  find plane
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  added: read book
+  ____________________________________________________________
+  ____________________________________________________________
+  Here are the matching tasks in your list:
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
+  ```
+
+## Test Case: Reject find with no keyword
+
+- **Aim:** `find` with no argument is rejected with an error instead of
+  matching every task.
+- **Commands:**
+  ```
+  find
+  bye
+  ```
+- **Expected output:**
+  ```
+  ____________________________________________________________
+  OOPS!!! Tell me what to search for, e.g. find book
+  ____________________________________________________________
+  ____________________________________________________________
+  Bye. Hope to see you again soon!
+  ____________________________________________________________
   ```

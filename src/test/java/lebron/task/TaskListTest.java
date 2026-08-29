@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -134,5 +136,31 @@ public class TaskListTest {
         tasks.delete(1);
         assertEquals(2, tasks.asList().size());
         assertTrue(tasks.asList().contains(second));
+    }
+
+    // ---- find ---------------------------------------------------------
+
+    @Test
+    public void find_keywordInSomeDescriptions_returnsThoseInOrder() {
+        // setUp() adds: "read book", "return book", "buy bread"
+        List<Task> matches = tasks.find("book");
+        assertEquals(2, matches.size());
+        assertSame(first, matches.get(0));
+        assertSame(second, matches.get(1));
+    }
+
+    @Test
+    public void find_noDescriptionContainsKeyword_returnsEmpty() {
+        assertTrue(tasks.find("plane").isEmpty());
+    }
+
+    @Test
+    public void find_isCaseSensitive() {
+        assertTrue(tasks.find("Book").isEmpty());
+    }
+
+    @Test
+    public void find_onEmptyList_returnsEmpty() {
+        assertTrue(new TaskList().find("book").isEmpty());
     }
 }

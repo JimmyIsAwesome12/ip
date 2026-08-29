@@ -163,4 +163,18 @@ public class ParserTest {
         // Range checking is TaskList's job; the parser only needs a number.
         assertEquals(999, Parser.parse("mark 999").getIndex());
     }
+
+    // ---- find ----------------------------------------------------------
+
+    @Test
+    public void parse_find_returnsFindWithKeyword() throws LebronException {
+        ParsedCommand command = Parser.parse("find read book");
+        assertEquals(ParsedCommand.Type.FIND, command.getType());
+        assertEquals("read book", command.getDescription());
+    }
+
+    @Test
+    public void parse_findWithoutKeyword_throws() {
+        assertThrows(LebronException.class, () -> Parser.parse("find"));
+    }
 }

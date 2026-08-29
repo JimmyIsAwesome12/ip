@@ -68,6 +68,14 @@ public class Lebron {
             ui.showMessage("Now you have " + tasks.size() + " tasks in the list.");
             return false;
         }
+        case FIND: {
+            List<Task> matches = tasks.find(command.getDescription());
+            ui.showMessage("Here are the matching tasks in your list:");
+            for (int i = 0; i < matches.size(); i++) {
+                ui.showMessage((i + 1) + "." + matches.get(i));
+            }
+            return false;
+        }
         case BYE:
             ui.showMessage("Bye. Hope to see you again soon!");
             return true;
