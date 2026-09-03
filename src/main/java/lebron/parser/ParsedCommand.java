@@ -18,8 +18,8 @@ public class ParsedCommand {
 
     private final Type type;
     private final String description; // TODO, FIND (search keyword)
-    private final Task task;          // DEADLINE, EVENT
-    private final int index;          // MARK, UNMARK, DELETE
+    private final Task task; // DEADLINE, EVENT
+    private final int index; // MARK, UNMARK, DELETE
 
     private ParsedCommand(Type type, String description, Task task, int index) {
         this.type = type;

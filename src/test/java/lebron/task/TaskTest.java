@@ -101,20 +101,20 @@ public class TaskTest {
     @Test
     public void fromFileFormat_todoWithTrailingDateField_throws() {
         // A todo line must have exactly 3 fields.
-        assertThrows(IllegalArgumentException.class,
-                () -> Task.fromFileFormat("T | 0 | read book | 2019-12-02"));
+        assertThrows(IllegalArgumentException.class, () ->
+                Task.fromFileFormat("T | 0 | read book | 2019-12-02"));
     }
 
     @Test
     public void fromFileFormat_deadlineMissingDateField_throws() {
-        assertThrows(IllegalArgumentException.class,
-                () -> Task.fromFileFormat("D | 0 | return book"));
+        assertThrows(IllegalArgumentException.class, () ->
+                Task.fromFileFormat("D | 0 | return book"));
     }
 
     @Test
     public void fromFileFormat_deadlineUnparseableDate_throws() {
-        assertThrows(IllegalArgumentException.class,
-                () -> Task.fromFileFormat("D | 0 | return book | someday"));
+        assertThrows(IllegalArgumentException.class, () ->
+                Task.fromFileFormat("D | 0 | return book | someday"));
     }
 
     // ---- base class done-status behaviour --------------------------------

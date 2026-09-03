@@ -127,8 +127,8 @@ public class TaskListTest {
 
     @Test
     public void asList_isUnmodifiable() {
-        assertThrows(UnsupportedOperationException.class,
-                () -> tasks.asList().add(new Todo("nope")));
+        assertThrows(UnsupportedOperationException.class, () ->
+                tasks.asList().add(new Todo("nope")));
     }
 
     @Test
