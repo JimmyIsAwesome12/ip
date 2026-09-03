@@ -14,79 +14,107 @@ import lebron.task.Todo;
 import lebron.ui.Ui;
 
 /**
- * Entry point and top-level control loop. Wires together {@link Ui} (user
- * interaction), {@link Storage} (disk persistence), {@link TaskList} (the
- * task list) and {@link Parser} (understanding commands), then reads and
- * runs commands until the user says {@code bye}.
+ * The chatbot's backend: holds the task list and storage, and turns one line
+ * of user input into a response. Used by both the console entry point
+ * ({@link #main(String[])}) and the JavaFX GUI ({@link Main}).
  */
 public class Lebron {
-    /** This class only exposes {@link #main(String[])} and is not meant to be instantiated. */
-    private Lebron() {
+    private final Storage storage;
+    private final TaskList tasks;
+    private boolean isExit = false;
+
+    /**
+     * Creates a chatbot backed by the given data file.
+     *
+     * @param dataFile where tasks are loaded from and saved to
+     */
+    public Lebron(Path dataFile) {
+        this.storage = new Storage(dataFile);
+        this.tasks = new TaskList(storage.load());
+    }
+
+    /**
+     * Processes one line of user input and returns the text to show the
+     * user. Never throws -- a {@link LebronException}'s message becomes the
+     * response text, the same text the console prints for an error.
+     *
+     * @param input the raw line the user typed
+     * @return the response text
+     */
+    public String getResponse(String input) {
+        isExit = false;
+        try {
+            ParsedCommand command = Parser.parse(input);
+            isExit = command.getType() == ParsedCommand.Type.BYE;
+            return execute(command);
+        } catch (LebronException e) {
+            return e.getMessage();
+        }
+    }
+
+    /**
+     * Returns whether the most recent {@link #getResponse(String)} call was
+     * a {@code bye} command, i.e. whether the caller should now exit.
+     *
+     * @return true if the chatbot should exit
+     */
+    public boolean isExit() {
+        return isExit;
     }
 
     /**
      * Carries out one parsed command against the task list.
      *
      * @param command the command to run
-     * @param tasks the task list to act on
-     * @param ui the UI used to show results
-     * @param storage the storage to persist changes to
-     * @return {@code true} if the program should exit after this command
+     * @return the response text
      * @throws LebronException if the command cannot be completed (e.g. a
      *     task number that is out of range)
      */
-    private static boolean runCommand(ParsedCommand command, TaskList tasks, Ui ui, Storage storage)
-            throws LebronException {
+    private String execute(ParsedCommand command) throws LebronException {
         switch (command.getType()) {
             case LIST: {
                 List<Task> all = tasks.asList();
-                ui.showMessage("Here are the tasks in your list:");
+                StringBuilder message = new StringBuilder("Here are the tasks in your list:");
                 for (int i = 0; i < all.size(); i++) {
-                    ui.showMessage((i + 1) + "." + all.get(i));
+                    message.append(System.lineSeparator()).append(i + 1).append('.').append(all.get(i));
                 }
-                return false;
+                return message.toString();
             }
             case TODO:
                 tasks.add(new Todo(command.getDescription()));
                 storage.save(tasks);
-                ui.showMessage("added: " + command.getDescription());
-                return false;
+                return "added: " + command.getDescription();
             case DEADLINE:
             case EVENT:
                 tasks.add(command.getTask());
                 storage.save(tasks);
-                ui.showMessage("added: " + command.getTask());
-                return false;
+                return "added: " + command.getTask();
             case MARK:
             case UNMARK: {
                 boolean isMark = command.getType() == ParsedCommand.Type.MARK;
                 Task task = isMark ? tasks.mark(command.getIndex()) : tasks.unmark(command.getIndex());
                 storage.save(tasks);
-                ui.showMessage(isMark
+                String header = isMark
                         ? "Nice! I've marked this task as done:"
-                        : "OK, I've marked this task as not done yet:");
-                ui.showMessage("  " + task);
-                return false;
+                        : "OK, I've marked this task as not done yet:";
+                return header + System.lineSeparator() + "  " + task;
             }
             case DELETE: {
                 Task removed = tasks.delete(command.getIndex());
                 storage.save(tasks);
-                ui.showMessage("Noted. I've removed this task:");
-                ui.showMessage("  " + removed);
-                ui.showMessage("Now you have " + tasks.size() + " tasks in the list.");
-                return false;
+                return "Noted. I've removed this task:" + System.lineSeparator() + "  " + removed
+                        + System.lineSeparator() + "Now you have " + tasks.size() + " tasks in the list.";
             }
             case FIND: {
                 List<Task> matches = tasks.find(command.getDescription());
-                ui.showMessage("Here are the matching tasks in your list:");
+                StringBuilder message = new StringBuilder("Here are the matching tasks in your list:");
                 for (int i = 0; i < matches.size(); i++) {
-                    ui.showMessage((i + 1) + "." + matches.get(i));
+                    message.append(System.lineSeparator()).append(i + 1).append('.').append(matches.get(i));
                 }
-                return false;
+                return message.toString();
             }
             case BYE:
-                ui.showMessage("Bye. Hope to see you again soon!");
-                return true;
+                return "Bye. Hope to see you again soon!";
             default:
                 // Parser only ever returns the types handled above.
                 throw new LebronException("OOPS!!! I don't understand that command.");
@@ -94,34 +122,39 @@ public class Lebron {
     }
 
     /**
-     * Sets up the UI, storage and task list, then reads and runs commands
-     * until the user exits.
+     * Runs the console loop: reads and executes commands until the user
+     * exits, printing each response through {@code ui}.
+     *
+     * @param ui the console UI to read commands from and print responses to
+     */
+    private void runCli(Ui ui) {
+        boolean exit = false;
+        while (!exit) {
+            String fullCommand = ui.readCommand();
+            ui.showLine();
+            ui.showMessage(getResponse(fullCommand));
+            exit = isExit();
+            ui.showLine();
+        }
+        ui.close();
+    }
+
+    /**
+     * Console entry point. Tasks are persisted to {@code ./data/lebron.txt}
+     * (relative to the working directory); the path is built from segments
+     * so it works on any OS, and {@link Storage} handles the file/folder not
+     * existing yet.
+     *
+     * <p>The greeting is shown, and only then is the data file loaded (by
+     * constructing {@code Lebron}), so a "your data file is corrupted"
+     * warning prints after the banner, not before it.
      *
      * @param args command-line arguments (unused)
      */
     public static void main(String[] args) {
         Ui ui = new Ui();
         ui.showWelcome();
-
-        // Tasks are persisted to ./data/lebron.txt (relative to the project
-        // root). The path is built from segments so it works on any OS, and
-        // Storage handles the file/folder not existing yet.
-        Path dataFile = Paths.get("data", "lebron.txt");
-        Storage storage = new Storage(dataFile);
-        TaskList tasks = new TaskList(storage.load());
-
-        boolean isExit = false;
-        while (!isExit) {
-            String fullCommand = ui.readCommand();
-            ui.showLine();
-            try {
-                ParsedCommand command = Parser.parse(fullCommand);
-                isExit = runCommand(command, tasks, ui, storage);
-            } catch (LebronException e) {
-                ui.showMessage(e.getMessage());
-            }
-            ui.showLine();
-        }
-        ui.close();
+        Lebron lebron = new Lebron(Paths.get("data", "lebron.txt"));
+        lebron.runCli(ui);
     }
 }
