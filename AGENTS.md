@@ -32,6 +32,8 @@ Ensure that Java 25 is used when running the application or build tasks. On macO
 
 All Java code in this project — new and edited — must comply with the SE-EDU intermediate Java coding standard. **Invoke the `seedu-java-coding-standard` skill before writing or reviewing Java code**, and check the result against it. Key points: 4-space indent, lines ≤ 120 chars, K&R braces on every block (even one-liners), `switch` cases indented from `switch`, explicit imports in the standard group order, predicate-style boolean names, and Javadoc on every class, every public method, every non-trivial private method, and `protected` fields.
 
+The project also runs Checkstyle (`config/checkstyle/checkstyle.xml`, the AB3 rule set) as the mechanical backstop for everything above that's expressible as a rule. Run `./gradlew checkstyleMain checkstyleTest` after any code change and fix what it reports — it's the tiebreaker for anything the skill's judgment calls leave ambiguous.
+
 ## Git
 
 Use lightweight tags unless the user requests an annotated tag.

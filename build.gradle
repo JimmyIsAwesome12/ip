@@ -42,7 +42,10 @@ test {
 }
 
 application {
-    mainClass = 'lebron.Lebron'
+    // The GUI (lebron.Main) is the primary way to run the app; the console
+    // version (lebron.Lebron) is still runnable directly by class name,
+    // e.g. for the text-UI test harness: java -cp <classes> lebron.Lebron
+    mainClass = 'lebron.Main'
 }
 
 jar {
@@ -54,8 +57,4 @@ jar {
 
 shadowJar {
     archiveFileName = 'duke.jar'
-}
-
-run {
-    standardInput = System.in
 }
