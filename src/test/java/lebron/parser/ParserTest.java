@@ -115,14 +115,14 @@ public class ParserTest {
 
     @Test
     public void parse_eventToBeforeFrom_throws() {
-        assertThrows(LebronException.class,
-                () -> Parser.parse("event meeting /to 2019-12-02 /from 2019-12-01"));
+        assertThrows(LebronException.class, () ->
+                Parser.parse("event meeting /to 2019-12-02 /from 2019-12-01"));
     }
 
     @Test
     public void parse_eventUnparseableDate_throws() {
-        assertThrows(LebronException.class,
-                () -> Parser.parse("event meeting /from someday /to 2019-12-02"));
+        assertThrows(LebronException.class, () ->
+                Parser.parse("event meeting /from someday /to 2019-12-02"));
     }
 
     // ---- mark / unmark / delete ----------------------------------
